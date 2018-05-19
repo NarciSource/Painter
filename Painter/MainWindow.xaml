@@ -1,0 +1,135 @@
+﻿<Window x:Class="Paint.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Paint"
+        mc:Ignorable="d"
+        Title="Painter" Height="700" Width="1080">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Height="120">
+            <TabControl>
+                <TabItem Header="Menu">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="0,0,0,0" Width="40" Height="Auto" Click="Save_Click">
+                            <StackPanel Orientation="Vertical" Width="Auto" HorizontalAlignment="Left">
+                                <Image Source="img/save.png"/>
+                                <TextBlock Text="Save" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="10,0,0,0" Width="40" Height="Auto" Click="Clear_Click">
+                            <StackPanel Orientation="Vertical" Width="Auto" HorizontalAlignment="Left">
+                                <Image Source="img/clear.png"/>
+                                <TextBlock Text="Clear" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="10,0,0,0" Width="40" Height="Auto" Click="Undo_Click">
+                            <StackPanel Orientation="Vertical" Width="Auto" HorizontalAlignment="Left">
+                                <Image Source="img/undo.png"/>
+                                <TextBlock Text="Undo" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="10,0,0,0" Width="40" Height="Auto" Click="About_Click">
+                            <StackPanel Orientation="Vertical" Width="Auto" HorizontalAlignment="Left">
+                                <Image Source="img/about.png"/>
+                                <TextBlock Text="About" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Border/>
+                    </DockPanel>
+
+                </TabItem>
+                <TabItem Header="Mode">
+                    <DockPanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+
+                            <RadioButton Content="Pencil" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Checked="Pencil_Check" IsChecked="True"/>
+                            <RadioButton Content="Line" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Checked="Line_Check"/>
+                            <RadioButton Content="Rectangle" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Checked="Rectangle_Check"/>
+                            <RadioButton Content="Filed Rectangle" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Checked="Filed_Rectangle_Check"/>
+                            <RadioButton Content="Eraser" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Checked="Eraser_Check"/>
+                            <RadioButton Content="Full Fill" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Checked="FullFill_Check" IsEnabled="False"/>
+                        </Grid>
+
+                        <Border Margin="20,0,0,0"></Border>
+
+                        <Button x:Name="frontColorCap" DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="0,15,0,0" Click="Front_Color_Button" Background="LightSkyBlue">
+                            <StackPanel Orientation="Vertical" Width="40" HorizontalAlignment="Left">
+                                <Button x:Name="frontColor" Background="Black" Height="40"/>
+                                <TextBlock Text="Front" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="backColorCap" DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="0,15,0,0" Click="Back_Color_Button">
+                            <StackPanel Orientation="Vertical" Width="40" HorizontalAlignment="Left">
+                                <Button x:Name="backColor" Background="White" Height="40"/>
+                                <TextBlock Text="Back" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Grid Margin="10,0,0,0" Height="60" Width="90">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Background="Black" Grid.Row="0" Grid.Column="0" Click="Black_Click"/>
+                            <Button Background="Gray" Grid.Row="0" Grid.Column="1" Click="Gray_Click"/>
+                            <Button Background="Red" Grid.Row="0" Grid.Column="2" Click="Red_Click"/>
+                            <Button Background="White" Grid.Row="1" Grid.Column="0" Click="White_Click"/>
+                            <Button Background="Blue" Grid.Row="1" Grid.Column="1" Click="Blue_Click"/>
+                            <Button Background="Yellow" Grid.Row="1" Grid.Column="2" Click="Yellow_Click"/>
+
+                        </Grid>
+
+                        <DockPanel Margin="30,0,0,0">
+
+                            <Slider DockPanel.Dock="Top" VerticalAlignment="Center" Margin="0,40,0,0" Width="100" ValueChanged="Slider_Value_Changed" Minimum="1"/>
+                            <Label DockPanel.Dock="Bottom" FontSize="10" HorizontalAlignment="Center" Content="Thickness"/>
+
+                        </DockPanel>
+                        <Border/>
+                    </DockPanel>
+                </TabItem>
+            </TabControl>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom">
+            <StatusBar>
+                <Label Content="Point Position = "/>
+                <Label x:Name="point_position" Content="000,000"/>
+                <Label Content="Color = "/>
+                <Label x:Name="point_color" Content="0 0 0"/>
+                <Label Content="Undo Times = "/>
+                <Label x:Name="undo_times" Content="0"/>
+            </StatusBar>
+
+        </Border>
+        
+        <Border DockPanel.Dock="Top">
+
+            <Canvas x:Name="canvas" MouseLeftButtonDown="Mouse_Left_Down" MouseLeftButtonUp="Mouse_Left_Up" MouseMove="Mouse_Move">
+                <Canvas.Background>
+                    <SolidColorBrush Color="White" Opacity="0"/>
+                </Canvas.Background>
+            </Canvas>
+        </Border>
+
+        
+
+    </DockPanel>
+</Window>
