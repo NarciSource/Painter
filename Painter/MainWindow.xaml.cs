@@ -82,163 +82,163 @@ namespace Paint
             Line,
             Rectangle,
             Filed_Rectangle,
+            Polygon,
+            Filed_Polygon,
+            Circle,
             Eraser,
             FullFill
         };
-        Painting_Mode painting_mode = Painting_Mode.Pencil;
-
-        Point start_point, current_point;
-        bool is_painting = false;
-        int history_pivot = 0;
+        Painting_Mode painting_mode = Painting_Mode.Pencil; //basic mode
 
 
 
+
+        Shape shape = null;
+        int num_of_vertices = 0;
+        PointCollection points = new PointCollection();
+        int polygon_pivot = 0;
 
         private void Mouse_Left_Down(object sender, MouseButtonEventArgs e)
         {
-            start_point = e.GetPosition(canvas);
-            current_point = e.GetPosition(canvas);
-
-            is_painting = true;
-            history_pivot = canvas.Children.Count;
-
-            
+            points = new PointCollection();
+            points.Add(e.GetPosition(canvas));
             
 
-
-            if (painting_mode == Painting_Mode.FullFill)
-            {                
-                Point targetPoint = e.GetPosition(canvas);
-                Color targetColor = Get_Color(targetPoint);
-                Color replaceColor = front_color;
-                
-                Stack<Point> pixels = new Stack<Point>();
-                pixels.Push(targetPoint);
-
-                PointCollection selected_pixels = new PointCollection();
-
-                while (pixels.Count() > 0)
-                {
-                    Point point = pixels.Pop();
-
-                    if (point.X < (int)canvas.ActualWidth && point.X > 0 &&
-                        point.Y < (int)canvas.ActualHeight && point.Y > 0)//make sure we stay within bounds
+            switch (painting_mode)
+            {
+                case Painting_Mode.Pencil:
+                case Painting_Mode.Eraser:
+                    shape = new Polyline()
                     {
-                        if (Get_Color(point) == targetColor)
-                        {
-                            
-                            pixels.Push(new Point(point.X - 1, point.Y));
-                            pixels.Push(new Point(point.X + 1, point.Y));
-                            pixels.Push(new Point(point.X, point.Y - 1));
-                            pixels.Push(new Point(point.X, point.Y + 1));
-                            Set_Color(point, replaceColor);
-                            /*
-                            Ellipse currentDot = new Ellipse();
-                            currentDot.Stroke = new SolidColorBrush(Colors.Green);
-                            currentDot.StrokeThickness = 1;
-                            currentDot.Height = 1;
-                            currentDot.Width = 1;
-                            currentDot.Fill = new SolidColorBrush(Colors.Green);
-                            currentDot.Margin = new Thickness(point.X, point.Y, 0, 0); // Sets the position.
-                            canvas.Children.Add(currentDot);
-                            */
-                        }
+                        Points = points
+                    };
+
+                    if (painting_mode == Painting_Mode.Pencil)
+                    {
+                        shape.Stroke = new SolidColorBrush(front_color);
+                        shape.StrokeThickness = thickness;                        
                     }
-                }
+                    else if (painting_mode == Painting_Mode.Eraser)
+                    {
+                        shape.Stroke = new SolidColorBrush(back_color);
+                        shape.StrokeThickness = 30;
+                    }
+                
+                    break;
+
+                case Painting_Mode.Line:
+                    shape = new Line()
+                    {
+                        Stroke = new SolidColorBrush(front_color),
+                        StrokeThickness = thickness,
+                        X1 = e.GetPosition(canvas).X,
+                        Y1 = e.GetPosition(canvas).Y,
+                    };
+                    break;
+
+                case Painting_Mode.Filed_Rectangle:
+                case Painting_Mode.Rectangle:
+                    shape = new Rectangle()
+                    {
+                        Stroke = new SolidColorBrush(front_color),
+                        StrokeThickness = thickness,
+                    };
+                    break;
+
+                case Painting_Mode.Filed_Polygon:
+                case Painting_Mode.Polygon:                
+                    shape = new Polygon()
+                    {
+                        Stroke = new SolidColorBrush(front_color),
+                        StrokeThickness = thickness,
+                        Points = points
+                    };
+                    polygon_pivot=1;
+                    break;
+
+                case Painting_Mode.FullFill:
+                    Full_Painting(e.GetPosition(canvas));
+                    break;
+            }
+
+            if (painting_mode == Painting_Mode.Filed_Polygon ||
+                painting_mode == Painting_Mode.Filed_Rectangle)
+                shape.Fill = new SolidColorBrush(back_color);
+
+
+
+            try
+            {
+                canvas.Children.Add(shape);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.ToString());
                 
             }
         }
 
-        private void Mouse_Left_Up(object sender, MouseButtonEventArgs e)
-        {
-            is_painting = false;
-        }
 
 
 
-        
-
-        PointCollection pencil_line = new PointCollection();
         private void Mouse_Move(object sender, MouseEventArgs e)
         {
-            Refresh_Status(e.GetPosition(canvas), Get_Color(e.GetPosition(canvas)), canvas.Children.Count);
-
-
-            Shape shape=null;
+            Point point = e.GetPosition(canvas);
+            Refresh_Status(point, Get_Color(point), canvas.Children.Count);
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 Capture_Canvas();
                 switch (painting_mode)
                 {
-                    case Painting_Mode.Pencil:                        
-                        pencil_line.Add(e.GetPosition(canvas));
-
-                        shape = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(front_color),
-                            StrokeThickness = thickness,
-                            Points = pencil_line.Clone()
-                        };
-                        break;
-
+                    case Painting_Mode.Pencil:
                     case Painting_Mode.Eraser:
-                        pencil_line.Add(e.GetPosition(canvas));
-
-                        shape = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(back_color),
-                            StrokeThickness = 30,
-                            Points = pencil_line.Clone()
-                        };
+                        points.Add(point);
                         break;
 
                     case Painting_Mode.Line:
-                        shape = new Line()
-                        {
-                            Stroke = new SolidColorBrush(front_color),
-                            StrokeThickness = thickness,
-                            X1 = start_point.X,
-                            Y1 = start_point.Y,
-                            X2 = e.GetPosition(canvas).X,
-                            Y2 = e.GetPosition(canvas).Y
-                        };
+                        ((Line)shape).X2 = point.X;
+                        ((Line)shape).Y2 = point.Y;
+                        num_of_vertices = 2;
                         break;
 
                     case Painting_Mode.Filed_Rectangle:
                     case Painting_Mode.Rectangle:
-                        shape = new Rectangle()
-                        {
-                            Stroke = new SolidColorBrush(front_color),
-                            StrokeThickness = thickness,
-                            Width = Math.Abs(start_point.X - e.GetPosition(canvas).X),
-                            Height = Math.Abs(start_point.Y - e.GetPosition(canvas).Y),
-                            Margin = new Thickness(Math.Min(start_point.X, e.GetPosition(canvas).X),
-                                                    Math.Min(start_point.Y, e.GetPosition(canvas).Y), 0, 0)
-                        };
+                        shape.Width = Math.Abs(points[0].X - point.X);
+                        shape.Height = Math.Abs(points[0].Y - point.Y);
+                        shape.Margin = new Thickness(Math.Min(points[0].X, point.X),
+                                                    Math.Min(points[0].Y, point.Y), 0, 0);
+                        num_of_vertices = 4;
+                        break;
 
-                        if (painting_mode == Painting_Mode.Filed_Rectangle)
-                            shape.Fill = new SolidColorBrush(back_color);
+                    case Painting_Mode.Filed_Polygon:
+                    case Painting_Mode.Polygon:
+                        if (points.Count <= polygon_pivot)
+                            points.Add(point);
+                        else
+                            points[polygon_pivot] = point;
+
                         break;
                 }
-
-                try
-                {
-                    if (is_painting)
-                        for (int i = history_pivot; i < canvas.Children.Count; i++)
-                            canvas.Children.RemoveAt(i);
-                
-                    canvas.Children.Add(shape);
-                }
-                catch (Exception exception)
-                {
-                    MessageBox.Show(exception.ToString());
-                }
-                
             }
-            else
+        }
+
+
+        private void Mouse_Left_Up(object sender, MouseButtonEventArgs e)
+        {
+        }
+
+
+        private void onKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) //Why does not work the program with spaces key?
             {
-                pencil_line.Clear();
+                if (painting_mode == Painting_Mode.Polygon ||
+                    painting_mode==Painting_Mode.Filed_Polygon)
+                {
+                    polygon_pivot++;
+                    num_of_vertices = polygon_pivot + 1;
+                }
             }
         }
 
@@ -370,6 +370,21 @@ namespace Paint
             painting_mode = Painting_Mode.Rectangle;
         }
 
+        private void Polygon_Check(object sender, RoutedEventArgs e)
+        {
+            painting_mode = Painting_Mode.Polygon;
+        }
+
+        private void Filed_Polygon_Check(object sender, RoutedEventArgs e)
+        {
+            painting_mode = Painting_Mode.Filed_Polygon;
+        }
+
+        private void Circle_Check(object sender, RoutedEventArgs e)
+        {
+            painting_mode = Painting_Mode.Circle;
+        }
+
         private void Filed_Rectangle_Check(object sender, RoutedEventArgs e)
         {
             painting_mode = Painting_Mode.Filed_Rectangle;
@@ -397,11 +412,19 @@ namespace Paint
 
 
 
+
+
+
+
+
+
+
         private void Refresh_Status(Point position, Color color, int undos)
         {
             point_position.Content = position.ToString();
             point_color.Content = color.R + " " + color.G + " " + color.B;
             undo_times.Content = undos.ToString();
+            polygon_vertices.Content = num_of_vertices;
         }
 
 
@@ -458,6 +481,46 @@ namespace Paint
             int stride = (width * renderTargetBitmap.Format.BitsPerPixel + 7) / 8;
 
             renderTargetBitmap.CopyPixels(new Int32Rect(0, 0, width, height), image_pixels, stride, 0);
+        }
+
+        private void Full_Painting(Point targetPoint)
+        {
+            Color targetColor = Get_Color(targetPoint);
+            Color replaceColor = front_color;
+
+            Stack<Point> pixels = new Stack<Point>();
+            pixels.Push(targetPoint);
+
+            PointCollection selected_pixels = new PointCollection();
+
+            while (pixels.Count > 0)
+            {
+                Point point = pixels.Pop();
+
+                if (point.X < (int)canvas.ActualWidth && point.X > 0 &&
+                    point.Y < (int)canvas.ActualHeight && point.Y > 0)//make sure we stay within bounds
+                {
+                    if (Get_Color(point) == targetColor)
+                    {
+
+                        pixels.Push(new Point(point.X - 1, point.Y));
+                        pixels.Push(new Point(point.X + 1, point.Y));
+                        pixels.Push(new Point(point.X, point.Y - 1));
+                        pixels.Push(new Point(point.X, point.Y + 1));
+                        Set_Color(point, replaceColor);
+
+                        Ellipse currentDot = new Ellipse();
+                        currentDot.Stroke = new SolidColorBrush(Colors.Green);
+                        currentDot.StrokeThickness = 1;
+                        currentDot.Height = 1;
+                        currentDot.Width = 1;
+                        currentDot.Fill = new SolidColorBrush(Colors.Green);
+                        currentDot.Margin = new Thickness(point.X, point.Y, 0, 0); // Sets the position.
+                        canvas.Children.Add(currentDot);
+
+                    }
+                }
+            }
         }
     }
 }

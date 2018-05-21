@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Paint"
         mc:Ignorable="d"
-        Title="Painter" Height="700" Width="1080">
+        Title="Painter" Height="700" Width="1080" KeyDown="onKeyDown">
     <DockPanel>
         <Border DockPanel.Dock="Top" Height="120">
             <TabControl>
@@ -50,14 +50,17 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
+                                <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
 
                             <RadioButton Content="Pencil" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Checked="Pencil_Check" IsChecked="True"/>
                             <RadioButton Content="Line" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Checked="Line_Check"/>
                             <RadioButton Content="Rectangle" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Checked="Rectangle_Check"/>
                             <RadioButton Content="Filed Rectangle" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Checked="Filed_Rectangle_Check"/>
-                            <RadioButton Content="Eraser" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Checked="Eraser_Check"/>
-                            <RadioButton Content="Full Fill" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Checked="FullFill_Check" IsEnabled="False"/>
+                            <RadioButton Content="Polygon" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Checked="Polygon_Check" ToolTip="Drag the mouse and press Enter to add the vertex." />
+                            <RadioButton Content="Filed Polygon" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Checked="Filed_Polygon_Check" ToolTip="Drag the mouse and press Enter to add the vertex." />
+                            <RadioButton Content="Eraser" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" Checked="Eraser_Check"/>
+                            <RadioButton Content="Full Fill" Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Checked="FullFill_Check" IsEnabled="False"/>
                         </Grid>
 
                         <Border Margin="20,0,0,0"></Border>
@@ -116,6 +119,8 @@
                 <Label x:Name="point_color" Content="0 0 0"/>
                 <Label Content="Undo Times = "/>
                 <Label x:Name="undo_times" Content="0"/>
+                <Label Content="Polygon Vertices = "/>
+                <Label x:Name="polygon_vertices"/>
             </StatusBar>
 
         </Border>
